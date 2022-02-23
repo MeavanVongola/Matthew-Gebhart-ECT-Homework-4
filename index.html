@@ -1,0 +1,105 @@
+<html>
+
+<head>
+    <title>MindAR.js: simultaneous tracking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+    <!-- Aframe extras is used to enable in-built animation. -->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+</head>
+
+<body>
+    <!-- Included maxTrack: 2 so now we will be able to track 2 targets -->
+    <a-scene mindar-image="
+        imageTargetSrc: targets.mind; 
+        maxTrack: 1;" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights"
+        >
+        <!-- Preload assets. Video and 3D model with animation. 3D model animation
+        was created using Mixamo. Audio was taken from https://mixkit.co/ -->
+        <a-assets>
+            <video id="videoId" src="Arise.mp4#t=0.1"></video>
+            
+        </a-assets>
+
+        <!-- All icon images were taken from flaticon.com -->
+        <!-- First image target.  -->
+        <a-entity mindar-image-target="targetIndex: 0">          
+            <!-- Video -->
+            <a-entity id="myVideo" material="src: #videoId" geometry="primitive: plane;
+              width: 1; height: 0.7" position="0 0 0">
+            </a-entity>
+
+            <!-- Play Button -->
+            <a-entity id="playB" class="interactive" scale="0.2 0.2 0.2" geometry="primitive: plane;"
+                material="src: play.png; transparent: true" position="-0.13 -0.35 0.1">
+            </a-entity>
+
+            <!-- Pause Button -->
+            <a-entity id="pauseB" class="interactive" scale="0.2 0.2 0.2" geometry="primitive: plane;"
+                material="src: pause.png; transparent: true" position="0.13 -0.35 0.1">
+            </a-entity>
+        </a-entity>
+
+        
+
+        <!-- 
+            Camera with click interactions. Pay atention to "objects: .interactive". Elements with interactive class 
+            are clickable. See above
+        -->
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="rayOrigin: mouse;"
+                raycaster="far: ${customFields.libVersion}; objects: .interactive"></a-camera>
+
+    </a-scene>
+</body>
+<script>
+    // Image target 1 code
+    var playB = document.querySelector("#playB");
+    var pauseB = document.querySelector("#pauseB");
+    var video = document.querySelector("video");
+    var logo1 = document.querySelector("#logo");
+    var myModel = document.querySelector("#myModel");
+    var myVideo = document.querySelector("myVideo");
+
+    playB.addEventListener('click', () => {
+        video.play();
+    });
+    pauseB.addEventListener('click', () => {
+        video.pause();
+
+    });
+
+
+    
+            // when target is found do the following:
+            target.addEventListener('targetFound', function(){
+
+                // every frame (100; every one tenth of a second)
+                check = setInterval(() => {
+                    // Get position of camera and marker (Three.js syntaxis): https://aframe.io/docs/1.3.0/components/position.html#sidebar
+                    // {x:float y:float z:float}
+                    markerPos = new THREE.Vector3();
+                    cameraPos = new THREE.Vector3();
+                    markerPosition = target.object3D.getWorldPosition(markerPos);
+                    cameraPosition = camera.object3D.getWorldPosition(cameraPos);
+                    // calculate distance between both and divide by 1000 to get numbers in the range of 1-10
+                    distance = cameraPosition.distanceTo(markerPosition) / 1000;
+                    if (distance < 2.5){
+                        mySound.play();
+                    } else {
+                        mySound.pause();
+                    }
+                }, 100);
+            });
+
+            target.addEventListener('targetLost', function(){
+                clearInterval(check);
+            })
+</script>
+
+</html>
